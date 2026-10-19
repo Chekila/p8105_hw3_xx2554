@@ -242,8 +242,30 @@ total_activity_df |>
 Total daily activity generally decreases with age across all three education groups. The smoothed trends suggest some differences between men and women, although these patterns vary by education level. Overall, activity levels tend to be lower at older ages.
 
 #### 24-Hour Activity Patterns
+```{r}
+activity_time_df =
+  nhanes_df |>
+  mutate(
+    hour = minute / 60
+  )
+```
 
-
+```{r}
+activity_time_df |>
+  ggplot(aes(x = hour, y = MIMS, color = sex)) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ education, nrow = 1) +
+  labs(
+    title = "24-Hour Activity Patterns by Education and Sex",
+    x = "Hour of day",
+    y = "MIMS",
+    color = "Sex"
+  ) +
+  scale_x_continuous(
+    breaks = c(0, 6, 12, 18, 24)
+  )
+```
+Across all three education groups, activity is lowest overnight, rises sharply in the morning, remains relatively high during the daytime, and declines again in the evening. Women generally show slightly higher daytime activity than men, with the difference appearing most clearly in the "More than high school" group. Overall, the 24-hour activity patterns are broadly similar across education levels.
 
 ### Problem 3
 
