@@ -185,6 +185,36 @@ n_distinct(nhanes_df$SEQN)
 After cleaning and merging the demographic and accelerometer data, the final dataset contains `r n_distinct(nhanes_df$SEQN)` participants and `r nrow(nhanes_df)` minute-level observations. Participants younger than 21 years and those with missing demographic data were excluded, and sex and education were encoded as factors.
 
 #### Demographic Table and Age Distribution
+```{r}
+demographic_table =
+  nhanes_covar_clean |>
+  count(education, sex) |>
+  pivot_wider(
+    names_from = sex,
+    values_from = n
+  )
+
+knitr::kable(
+  demographic_table,
+  caption = "Number of Participants by Education Level and Sex"
+)
+```
+
+```{r}
+nhanes_covar_clean |>
+  ggplot(aes(x = age, fill = sex)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ education, nrow = 1) +
+  labs(
+    title = "Age Distribution by Sex and Education Level",
+    x = "Age",
+    y = "Density",
+    fill = "Sex"
+  )
+```
+The largest education group is "More than high school," with `r sum(nhanes_covar_clean$education == "More than high school")` participants and similar numbers of men and women. The "High school equivalent" group has more men than women, while the "Less than high school" group is nearly balanced by sex. The age distributions overlap substantially within each education category, although some differences in shape are visible between men and women, particularly in the higher education groups.
+
+
 
 #### Total Daily Activity
 
