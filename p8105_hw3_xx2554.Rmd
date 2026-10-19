@@ -214,11 +214,35 @@ nhanes_covar_clean |>
 ```
 The largest education group is "More than high school," with `r sum(nhanes_covar_clean$education == "More than high school")` participants and similar numbers of men and women. The "High school equivalent" group has more men than women, while the "Less than high school" group is nearly balanced by sex. The age distributions overlap substantially within each education category, although some differences in shape are visible between men and women, particularly in the higher education groups.
 
-
-
 #### Total Daily Activity
+```{r}
+total_activity_df =
+  nhanes_df |>
+  group_by(SEQN, sex, age, BMI, education) |>
+  summarize(
+    total_activity = sum(MIMS, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+total_activity_df |>
+  ggplot(aes(x = age, y = total_activity, color = sex)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~ education, nrow = 1) +
+  labs(
+    title = "Total Daily Activity by Age, Sex, and Education",
+    x = "Age",
+    y = "Total daily activity",
+    color = "Sex"
+  )
+```
+
+Total daily activity generally decreases with age across all three education groups. The smoothed trends suggest some differences between men and women, although these patterns vary by education level. Overall, activity levels tend to be lower at older ages.
 
 #### 24-Hour Activity Patterns
+
 
 
 ### Problem 3
