@@ -55,6 +55,38 @@ The most commonly observed snowfall value is `r ny_noaa |> filter(!is.na(snow)) 
 
 #### Average Maximum Temperature in January and July
 
+```{r}
+temp_month_df =
+  ny_noaa |>
+  filter(month %in% c(1, 7)) |>
+  group_by(id, year, month) |>
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  filter(!is.nan(mean_tmax)) |>
+  mutate(
+    month = factor(
+      month,
+      levels = c(1, 7),
+      labels = c("January", "July")
+    )
+  )
+```
+
+```{r}
+temp_month_df |>
+  ggplot(aes(x = year, y = mean_tmax, group = id)) +
+  geom_line(alpha = 0.2) +
+  facet_grid(. ~ month) +
+  labs(
+    title = "Average Maximum Temperature in January and July",
+    x = "Year",
+    y = "Average maximum temperature (°C)"
+  )
+```
+
+January temperatures are much lower and more variable than July temperatures. The mean January maximum temperature is `r temp_month_df |> filter(month == "January") |> summarize(mean(mean_tmax, na.rm = TRUE)) |> pull() |> round(1)` °C, compared with `r temp_month_df |> filter(month == "July") |> summarize(mean(mean_tmax, na.rm = TRUE)) |> pull() |> round(1)` °C in July. Both months show clear year-to-year variation across stations, but July temperatures are more tightly clustered. A few unusually low station-year averages appear to be potential outliers, especially in January.
 
 #### Temperature and Snowfall Distributions
 
