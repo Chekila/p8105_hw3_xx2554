@@ -269,6 +269,97 @@ Across all three education groups, activity is lowest overnight, rises sharply i
 
 ### Problem 3
 
+#### Data Cleaning
+```{r}
+outer_dir = file.path(tempdir(), "citibike_outer")
+
+dir.create(
+  outer_dir,
+  showWarnings = FALSE,
+  recursive = TRUE
+)
+
+unzip(
+  "data/citibike.zip",
+  exdir = outer_dir
+)
+
+citibike_zip_files =
+  list.files(
+    file.path(outer_dir, "citibike"),
+    pattern = "\\.zip$",
+    full.names = TRUE
+  )
+
+citibike =
+  citibike_zip_files |>
+  map_dfr(
+    function(zip_file) {
+
+      csv_dir = tempfile()
+      dir.create(csv_dir)
+
+      csv_file =
+        unzip(
+          zip_file,
+          exdir = csv_dir
+        )
+
+      read_csv(
+        csv_file,
+        show_col_types = FALSE
+      ) |>
+        mutate(
+          year = parse_number(basename(zip_file)),
+          month = case_when(
+            str_detect(basename(zip_file), "Jan") ~ "January",
+            str_detect(basename(zip_file), "July") ~ "July"
+          )
+        )
+    }
+  ) |>
+  mutate(
+    year = factor(year, levels = c(2020, 2024)),
+    month = factor(month, levels = c("January", "July")),
+    weekdays = factor(
+      weekdays,
+      levels = c(
+        "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday", "Sunday"
+      )
+    ),
+    member_casual = factor(member_casual),
+    rideable_type = factor(rideable_type)
+  )
+
+glimpse(citibike)
+dim(citibike)
+```
+The cleaned Citi Bike dataset contains `r nrow(citibike)` rides and `r ncol(citibike)` variables. It combines rides from January and July of 2020 and 2024. The dataset includes ride ID, bike type, weekday, ride duration, start and end station names, membership status, year, and month. Categorical variables were encoded as factors to support later tables and plots.
+
+#### Ride Counts by Year, Month, and Membership
+```{r}
+ride_count_table =
+  citibike |>
+  count(year, month, member_casual) |>
+  pivot_wider(
+    names_from = member_casual,
+    values_from = n
+  )
+
+knitr::kable(
+  ride_count_table,
+  caption = "Total Number of Citi Bike Rides by Year, Month, and Membership Status"
+)
+```
+Citi Bike members account for more rides than casual riders in every year-month combination. Ride counts are also substantially higher in July than in January, suggesting strong seasonal differences in bike use. Overall ridership is higher in 2024 than in 2020, with the largest increase appearing in July 2024 for both casual riders and members.
+
+
+#### Most Popular Starting Stations in July 2024
+
+#### Median Ride Duration by Day, Month, and Year
+
+#### Ride Duration by Month, Membership, and Bike Type in 2024
 
 
 
