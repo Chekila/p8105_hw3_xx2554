@@ -407,7 +407,26 @@ Median ride duration is consistently higher in July than in January for both yea
 
 
 #### Ride Duration by Month, Membership, and Bike Type in 2024
-
+```{r}
+citibike |>
+  filter(year == 2024) |>
+  ggplot(
+    aes(
+      x = month,
+      y = duration,
+      fill = member_casual
+    )
+  ) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  facet_wrap(~ rideable_type) +
+  labs(
+    title = "Ride Duration in 2024 by Month, Membership, and Bike Type",
+    x = "Month",
+    y = "Ride duration (minutes)",
+    fill = "Membership"
+  )
+```
+Casual riders generally have longer ride durations than members for both classic and electric bikes. Ride durations are also somewhat longer in July than in January. The differences by membership status are more pronounced than the differences by bike type, although both bike types show many long-duration outliers.
 
 
 
