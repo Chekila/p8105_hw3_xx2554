@@ -123,8 +123,73 @@ ny_noaa |>
 Maximum and minimum temperatures show a strong positive relationship, with a correlation of `r cor(ny_noaa$tmin, ny_noaa$tmax, use = "complete.obs") |> round(2)`. A few extreme temperature observations are visible outside the main cluster. For snowfall values between 0 and 100 mm, the yearly distributions are generally similar, with an overall median of `r ny_noaa |> filter(snow > 0, snow < 100) |> summarize(median(snow, na.rm = TRUE)) |> pull()` mm and only modest variation across years.
 
 
-
 ### Problem 2
+#### Data Cleaning
+```{r}
+nhanes_covar =
+  read_csv(
+    "data/nhanes_covar.csv",
+    skip = 4
+  )
+
+nhanes_accel =
+  read_csv("data/nhanes_accel.csv")
+
+head(nhanes_covar)
+names(nhanes_accel)[1:6]
+tail(names(nhanes_accel))
+```
+
+```{r}
+nhanes_covar_clean =
+  nhanes_covar |>
+  filter(age >= 21) |>
+  drop_na(sex, age, BMI, education) |>
+  mutate(
+    sex = factor(
+      sex,
+      levels = c(1, 2),
+      labels = c("Male", "Female")
+    ),
+    education = factor(
+      education,
+      levels = c(1, 2, 3),
+      labels = c(
+        "Less than high school",
+        "High school equivalent",
+        "More than high school"
+      )
+    )
+  )
+
+nhanes_accel_long =
+  nhanes_accel |>
+  pivot_longer(
+    min1:min1440,
+    names_to = "minute",
+    values_to = "MIMS"
+  ) |>
+  mutate(
+    minute = parse_number(minute)
+  )
+
+nhanes_df =
+  nhanes_covar_clean |>
+  inner_join(nhanes_accel_long, by = "SEQN")
+```
+
+```{r}
+glimpse(nhanes_df)
+n_distinct(nhanes_df$SEQN)
+```
+After cleaning and merging the demographic and accelerometer data, the final dataset contains `r n_distinct(nhanes_df$SEQN)` participants and `r nrow(nhanes_df)` minute-level observations. Participants younger than 21 years and those with missing demographic data were excluded, and sex and education were encoded as factors.
+
+#### Demographic Table and Age Distribution
+
+#### Total Daily Activity
+
+#### 24-Hour Activity Patterns
+
 
 ### Problem 3
 
