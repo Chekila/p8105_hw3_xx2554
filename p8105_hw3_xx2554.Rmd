@@ -354,10 +354,57 @@ knitr::kable(
 ```
 Citi Bike members account for more rides than casual riders in every year-month combination. Ride counts are also substantially higher in July than in January, suggesting strong seasonal differences in bike use. Overall ridership is higher in 2024 than in 2020, with the largest increase appearing in July 2024 for both casual riders and members.
 
-
 #### Most Popular Starting Stations in July 2024
+```{r}
+top_stations =
+  citibike |>
+  filter(
+    year == 2024,
+    month == "July"
+  ) |>
+  count(start_station_name, sort = TRUE) |>
+  slice_head(n = 5)
+
+knitr::kable(
+  top_stations,
+  caption = "Top 5 Starting Stations in July 2024"
+)
+```
 
 #### Median Ride Duration by Day, Month, and Year
+```{r}
+median_duration_df =
+  citibike |>
+  group_by(year, month, weekdays) |>
+  summarize(
+    median_duration = median(duration, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+median_duration_df |>
+  ggplot(
+    aes(
+      x = weekdays,
+      y = median_duration,
+      group = month,
+      color = month
+    )
+  ) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ year) +
+  labs(
+    title = "Median Ride Duration by Day, Month, and Year",
+    x = "Day of week",
+    y = "Median ride duration (minutes)",
+    color = "Month"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+Median ride duration is consistently higher in July than in January for both years. Rides in 2020 also tend to have longer median durations than rides in 2024, especially during July. Weekend rides are generally longer than weekday rides, with the strongest increase occurring on Saturday and Sunday in July 2020.
+
 
 #### Ride Duration by Month, Membership, and Bike Type in 2024
 
